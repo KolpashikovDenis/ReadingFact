@@ -27,7 +27,7 @@ filter = str()
 if str_date:
     datefrom = dt.datetime.strptime(str_date, '%Y-%m-%d').date()
     date_to = dt.datetime.strptime(str_date, '%Y-%m-%d') + timedelta(days=1)-timedelta(seconds=1)
-    filter = "filter={{start_date ge %s}}" % (datefrom.strftime('%Y-%m-%dT%H:%M:%S'))
+    filter = "&filter={{start_date ge %s}} or {{stop_date le %s}}" % (datefrom.strftime('%Y-%m-%dT%H:%M:%S'), date_to.sfrftime('%Y-%m-%dT%H:%M:%S'))
 
 path = os.path.abspath(os.path.dirname(sys.argv[0])) + '\\' + config['DEFAULT']['folder']
 if not os.path.exists(path):
