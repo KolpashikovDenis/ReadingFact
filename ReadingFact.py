@@ -21,6 +21,7 @@ is_entity_route_sheet_operation = bool(config['DEFAULT']['entity_route_sheet_ope
 is_operation = bool(config['DEFAULT']['operation'])
 is_department = bool(config['DEFAULT']['department'])
 is_equipment_class = bool(config['DEFAULT']['equipment_class'])
+is_equipment = bool(config['DEFAULT']['equipment'])
 is_entity_batch = bool(config['DEFAULT']['entity_batch'])
 is_user = bool(config['DEFAULT']['user'])
 
@@ -47,6 +48,7 @@ filter_by_id = ''
 filter_for_entity_batch = ''
 filter_for_entity = ''
 filter_for_equipment_class = ''
+filter_for_equipment = ''
 filter_for_operation = ''
 filter_for_department = ''
 filter_for_entity_route_sheet_operation = ''
@@ -93,6 +95,7 @@ if is_entity_route_sheet_operation:
             filter_for_operation = '['
             filter_for_department = '['
             filter_for_equipment_class = '['
+            filter_for_equipment = '['
             filter_for_entity_route_sheet = '['
             for item in j['entity_route_sheet_operation']:
                 line = "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n" % \
@@ -105,11 +108,13 @@ if is_entity_route_sheet_operation:
                 filter_for_operation = filter_for_operation + str(item['operation_id']) + ','
                 filter_for_department = filter_for_department + str(item['department_id']) + ','
                 filter_for_equipment_class = filter_for_equipment_class + str(item['equipment_class_id']) + ','
+                filter_for_equipment = filter_for_equipment + str(item['equipment_id']) + ','
                 filter_for_entity_route_sheet = filter_for_entity_route_sheet + str(item['entity_route_sheet_id']) + ','
             filter_by_id = filter_by_id[:len(filter_by_id)-1]+']'
             filter_for_operation = filter_for_operation[:len(filter_for_operation)-1] + ']'
             filter_for_department = filter_for_department[:len(filter_for_department)-1] + ']'
             filter_for_equipment_class = filter_for_equipment_class[:len(filter_for_equipment_class)-1] + ']'
+            filter_for_equipment = filter_for_equipment[:len(filter_for_equipment)-1] + ']'
             filter_for_entity_route_sheet = filter_for_entity_route_sheet[:len(filter_for_entity_route_sheet)-1] + ']'
 
 if is_entity_route_sheet:
@@ -154,8 +159,8 @@ if is_department:
                 fout.write(line)
 
 if is_equipment_class:
-    filter_str = 'filter={{id in %s}}' % (filter_for_equipment_class)
-    str_request = hostname+'/rest/collection/equipment_class?order_by=id&'+filter_str
+    filter_str = '&filter={{id in %s}}' % (filter_for_equipment_class)
+    str_request = hostname+'/rest/collection/equipment_class?order_by=id'+filter_str
     responce = req.get(str_request, cookies=c, headers=h)
     j = json.loads(responce.text)
     with open(path+'\equipment_class.csv', 'w') as fout:
@@ -163,6 +168,18 @@ if is_equipment_class:
         if j['meta']['count'] != 0:
             for item in j['equipment_class']:
                 line = line = "%s;%s;%s\n" % (item['id'], item['identity'], item['name'])
+                fout.write(line)
+
+if is_equipment:
+    filter_str = '' #'&filter={{id in %s}}' % (filter_for_equipment)
+    str_request = hostname + '/rest/collection/equipment?order_by=id' + filter_str
+    responce = req.get(str_request, cookies = c, headers = h)
+    j = json.loads(responce.text)
+    with open(path + '\equipment.csv', 'w') as fout:
+        fout.write('id;name;identity;equipment_class_id;department_id\n')
+        if j['meta']['count'] != 0:
+            for item in j['equipment']:
+                line = line = "%s;%s;%s;%s;%s\n" % (item['id'], item['name'], item['identity'], item['equipment_class_id'], item['department_id'])
                 fout.write(line)
 
 if is_entity_batch:
